@@ -1,8 +1,8 @@
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 
-from encrypt import protect_content
-from encrypt.parser import HDLLanguage
+from hdl_encrypt import protect_content
+from hdl_encrypt.parser import HDLLanguage
 
 
 def test_protect_content_full_file() -> None:

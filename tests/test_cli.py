@@ -1,7 +1,7 @@
 import sys
 from unittest.mock import patch
 
-from encrypt.cli import parse_args
+from hdl_encrypt.cli import parse_args
 
 
 def test_parse_args_basic() -> None:

@@ -1,4 +1,4 @@
-from encrypt.parser import HDLLanguage, detect_language, find_protection_blocks
+from hdl_encrypt.parser import HDLLanguage, detect_language, find_protection_blocks
 
 
 def test_detect_language() -> None:

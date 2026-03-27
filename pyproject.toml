@@ -1,7 +1,7 @@
 [project]
-name = "encrypt"
+name = "hdl-encrypt"
 version = "0.1.0"
-description = "Add your description here"
+description = "Encrypt Verilog and VHDL files using the IEEE 1735 standard"
 readme = "README.md"
 authors = [
     { name = "Rasmus Olsen", email = "22944947+RasmusGOlsen@users.noreply.github.com" }
@@ -12,7 +12,7 @@ dependencies = [
 ]
 
 [project.scripts]
-encrypt = "encrypt:main"
+encrypt = "hdl_encrypt:main"
 
 [tool.ruff]
 line-length = 120

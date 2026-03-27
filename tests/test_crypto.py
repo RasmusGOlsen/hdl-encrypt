@@ -3,7 +3,7 @@ import base64
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 
-from encrypt.crypto import encrypt_data, generate_session_key, wrap_session_key
+from hdl_encrypt.crypto import encrypt_data, generate_session_key, wrap_session_key
 
 
 def test_generate_session_key() -> None:

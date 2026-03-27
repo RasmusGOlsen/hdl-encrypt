@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 
-from encrypt import main
+from hdl_encrypt import main
 
 
 def test_main_success(tmp_path: pathlib.Path) -> None:

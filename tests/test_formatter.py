@@ -1,5 +1,5 @@
-from encrypt.formatter import format_ieee1735_block
-from encrypt.parser import HDLLanguage
+from hdl_encrypt.formatter import format_ieee1735_block
+from hdl_encrypt.parser import HDLLanguage
 
 
 def test_format_ieee1735_block_verilog() -> None:
