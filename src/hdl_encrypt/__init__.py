@@ -1,28 +1,33 @@
 import sys
+from pathlib import Path
+from typing import Dict, List, Optional
 
 from .cli import parse_args
 from .crypto import encrypt_data, generate_session_key, wrap_session_key
 from .formatter import format_ieee1735_block
+from .key_manager import KeyManager
 from .parser import HDLLanguage, detect_language, find_protection_blocks
 
 
 def protect_content(
     content: str,
-    public_key_pem: bytes,
+    keys_metadata: List[Dict[str, any]],
     lang: HDLLanguage,
-    owner: str = "Unknown",
-    keyname: str = "default_key",
     full_file: bool = False,
 ) -> str:
     blocks = find_protection_blocks(content, lang)
 
     session_key = generate_session_key()
-    wrapped_key = wrap_session_key(session_key, public_key_pem)
+    
+    wrapped_keys = []
+    for key_info in keys_metadata:
+        wrapped_key = wrap_session_key(session_key, key_info["der"])
+        wrapped_keys.append((wrapped_key, key_info["owner"], key_info["name"]))
 
     if not blocks or full_file:
         # Encrypt the whole file
         encrypted_data = encrypt_data(content.encode("utf-8"), session_key)
-        return format_ieee1735_block(encrypted_data, wrapped_key, owner, keyname, lang)
+        return format_ieee1735_block(encrypted_data, wrapped_keys, lang)
     else:
         # Replace inline blocks
         final_parts = []
@@ -31,7 +36,7 @@ def protect_content(
             final_parts.append(content[last_offset : block.start_offset])
 
             encrypted_data = encrypt_data(block.content.encode("utf-8"), session_key)
-            formatted_block = format_ieee1735_block(encrypted_data, wrapped_key, owner, keyname, lang)
+            formatted_block = format_ieee1735_block(encrypted_data, wrapped_keys, lang)
             final_parts.append(formatted_block)
             last_offset = block.end_offset
 
@@ -49,16 +54,32 @@ def main() -> None:
         print(f"Error reading input file: {e}")
         sys.exit(1)
 
-    try:
-        with open(args.key, "rb") as f:
-            public_key_pem = f.read()
-    except Exception as e:
-        print(f"Error reading key file: {e}")
+    km = KeyManager()
+    
+    # 1. Scan from environment variable
+    km.scan_env("HDL_ENCRYPT_KEY_PATH")
+    
+    # 2. Scan from -k argument
+    if args.key:
+        path = Path(args.key)
+        if path.is_dir():
+            km.scan_directory(str(path))
+        elif path.is_file():
+            km.scan_file(str(path))
+        else:
+            print(f"Warning: Key path not found: {args.key}")
+
+    keys_dict = km.get_keys()
+    if not keys_dict:
+        print("Error: No valid public keys found.")
         sys.exit(1)
+
+    # Convert dictionary values to a list for protect_content
+    keys_metadata = list(keys_dict.values())
 
     lang = detect_language(args.input)
 
-    final_content = protect_content(content, public_key_pem, lang, args.owner, args.keyname, args.full_file)
+    final_content = protect_content(content, keys_metadata, lang, args.full_file)
 
     output_path = args.output if args.output else f"{args.input}.protected"
     try:

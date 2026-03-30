@@ -95,7 +95,8 @@ def test_main_key_read_error(tmp_path: pathlib.Path) -> None:
 
                     with pytest.raises(SystemExit):
                         main()
-                    mock_print.assert_any_call("Error reading key file: Key Error")
+                    mock_print.assert_any_call("Error: No valid public keys found.")
+
                     mock_exit.assert_called_with(1)
 
 

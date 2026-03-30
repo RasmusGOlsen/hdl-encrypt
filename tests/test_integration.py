@@ -12,7 +12,8 @@ def test_protect_content_full_file() -> None:
     )
 
     content = "module top; endmodule"
-    protected = protect_content(content, public_key_pem, HDLLanguage.VERILOG, full_file=True)
+    keys_metadata = [{"der": public_key_pem, "owner": "Owner", "name": "KeyName"}]
+    protected = protect_content(content, keys_metadata, HDLLanguage.VERILOG, full_file=True)
 
     assert "`pragma protect data_block" in protected
     assert "module top; endmodule" not in protected
@@ -31,7 +32,8 @@ module top;
 `pragma protect end
 endmodule
 """
-    protected = protect_content(content, public_key_pem, HDLLanguage.VERILOG, full_file=False)
+    keys_metadata = [{"der": public_key_pem, "owner": "Owner", "name": "KeyName"}]
+    protected = protect_content(content, keys_metadata, HDLLanguage.VERILOG, full_file=False)
 
     assert "module top;" in protected
     assert "endmodule" in protected
@@ -46,7 +48,8 @@ def test_protect_content_no_blocks_defaults_to_full() -> None:
     )
 
     content = "module top; endmodule"
-    protected = protect_content(content, public_key_pem, HDLLanguage.VERILOG, full_file=False)
+    keys_metadata = [{"der": public_key_pem, "owner": "Owner", "name": "KeyName"}]
+    protected = protect_content(content, keys_metadata, HDLLanguage.VERILOG, full_file=False)
 
     assert "`pragma protect data_block" in protected
     assert "module top; endmodule" not in protected

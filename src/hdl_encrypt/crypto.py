@@ -1,11 +1,13 @@
 import base64
 import os
 
+from typing import Union
+
 from cryptography.hazmat.primitives import hashes, padding
 from cryptography.hazmat.primitives.asymmetric import padding as asym_padding
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.primitives.serialization import load_pem_public_key
+from cryptography.hazmat.primitives.serialization import load_der_public_key, load_pem_public_key
 
 
 def generate_session_key(length: int = 32) -> bytes:
@@ -29,13 +31,21 @@ def encrypt_data(data: bytes, session_key: bytes) -> str:
     return base64.b64encode(iv + ciphertext).decode("utf-8")
 
 
-def wrap_session_key(session_key: bytes, public_key_pem: bytes) -> str:
+def wrap_session_key(session_key: bytes, public_key_input: Union[RSAPublicKey, bytes]) -> str:
     """
     Wrap the session key using an RSA public key with OAEP padding.
     """
-    public_key = load_pem_public_key(public_key_pem)
+    if isinstance(public_key_input, bytes):
+        try:
+            public_key = load_pem_public_key(public_key_input)
+        except Exception:
+            public_key = load_der_public_key(public_key_input)
+    else:
+        public_key = public_key_input
+
     if not isinstance(public_key, RSAPublicKey):
         raise ValueError("Provided key is not an RSA public key")
+    
     wrapped_key = public_key.encrypt(
         session_key,
         asym_padding.OAEP(mgf=asym_padding.MGF1(algorithm=hashes.SHA256()), algorithm=hashes.SHA256(), label=None),
