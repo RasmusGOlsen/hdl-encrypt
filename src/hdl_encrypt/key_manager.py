@@ -2,7 +2,6 @@ import base64
 import os
 import re
 from pathlib import Path
-from typing import Dict, List, Optional
 
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
 from cryptography.hazmat.primitives.serialization import (
@@ -15,7 +14,7 @@ from cryptography.hazmat.primitives.serialization import (
 
 class KeyManager:
     def __init__(self):
-        self.keys: Dict[str, Dict[str, str]] = {}
+        self.keys: dict[str, dict[str, str]] = {}
 
     def add_key(self, public_key_der: bytes, owner: str, name: str, method: str):
         # Store as base64 string of DER for keying
@@ -49,7 +48,7 @@ class KeyManager:
 
         # Try parsing as IEEE 1735 style
         text_content = content.decode("utf-8", errors="ignore")
-        
+
         # Remove comments to avoid false matches
         text_content = re.sub(r"//.*|--.*", "", text_content)
 
@@ -57,25 +56,25 @@ class KeyManager:
         # Since the format can be varied (one block per file or multiple),
         # we'll look for key_public_key and then look backwards for metadata
         # or just find all metadata and keys.
-        
+
         # A better approach: split by toolblocks if present, otherwise treat as one
         blocks = re.split(r"`(?:pragma\s+)?protect\s+(?:begin_toolblock|end_toolblock)", text_content)
         for block in blocks:
             if "key_public_key" not in block:
                 continue
-                
+
             owner_match = re.search(r'key_keyowner\s*=\s*"([^"]+)"', block)
             if not owner_match:
                 owner_match = re.search(r'key_keyowner\s*=\s*(\w+)', block)
-            
+
             name_match = re.search(r'key_keyname\s*=\s*"([^"]+)"', block)
             if not name_match:
                 name_match = re.search(r'key_keyname\s*=\s*(\w+)', block)
-                
+
             method_match = re.search(r'key_method\s*=\s*"([^"]+)"', block)
             if not method_match:
                 method_match = re.search(r'key_method\s*=\s*(\w+)', block)
-            
+
             owner = owner_match.group(1) if owner_match else "Unknown"
             name = name_match.group(1) if name_match else path.stem
             method = method_match.group(1) if method_match else "rsa"
@@ -98,7 +97,7 @@ class KeyManager:
                     else:
                         if real_key_lines:
                             break
-                
+
                 key_b64 = "".join(real_key_lines)
                 if key_b64:
                     try:
@@ -113,7 +112,7 @@ class KeyManager:
         path = Path(dir_path)
         if not path.is_dir():
             return
-        
+
         for file in path.rglob("*"):
             if file.is_file():
                 self.scan_file(str(file))
@@ -129,5 +128,5 @@ class KeyManager:
             elif path.is_file():
                 self.scan_file(str(path))
 
-    def get_keys(self) -> Dict[str, Dict[str, str]]:
+    def get_keys(self) -> dict[str, dict[str, str]]:
         return self.keys

@@ -17,7 +17,7 @@ class ProtectionBlock:
 
 
 def detect_language(filename: str) -> HDLLanguage:
-    if filename.endswith((".v", ".sv", ".vh")):
+    if filename.endswith((".v", ".sv", ".vh", ".svh")):
         return HDLLanguage.VERILOG
     if filename.endswith((".vhd", ".vhdl")):
         return HDLLanguage.VHDL

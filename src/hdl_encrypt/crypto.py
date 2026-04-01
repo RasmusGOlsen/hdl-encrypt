@@ -1,6 +1,5 @@
 import base64
 import os
-
 from typing import Union
 
 from cryptography.hazmat.primitives import hashes, padding
@@ -45,7 +44,7 @@ def wrap_session_key(session_key: bytes, public_key_input: Union[RSAPublicKey, b
 
     if not isinstance(public_key, RSAPublicKey):
         raise ValueError("Provided key is not an RSA public key")
-    
+
     wrapped_key = public_key.encrypt(
         session_key,
         asym_padding.OAEP(mgf=asym_padding.MGF1(algorithm=hashes.SHA256()), algorithm=hashes.SHA256(), label=None),
